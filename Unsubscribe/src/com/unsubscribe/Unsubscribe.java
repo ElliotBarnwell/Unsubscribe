@@ -1,7 +1,11 @@
 package com.unsubscribe;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.ini4j.InvalidFileFormatException;
+import org.ini4j.Wini;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -11,27 +15,46 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Unsubscribe {
 	
-	
+	public static String filename="Unsubscribeconfig.ini";
 	public static int maxto=10;
 	public static WebDriver driver;
 	static boolean found=false;
+	public static String username;
+	public static String password;
+	public static String sender;
 	public static void main(String[] args) throws InterruptedException {
 		// TODO Auto-generated method stub
-		  
+		try {
+			Wini ini= new Wini(new File(filename));
+			username=ini.get("INFO","username");
+			password=ini.get("INFO", "password");
+			sender=ini.get("INFO", "sender");
+			System.out.println(username + password + sender);
+			
+		} catch (InvalidFileFormatException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} 
+		
+		
+		
 		  driver= new ChromeDriver();
 		  driver.get("https://accounts.google.com/ServiceLogin?service=mail&continue=https://mail.google.com/mail/#identifier");
 		  
 		  driver.manage().window().maximize();
 		  waitforElement("//*[@id='Email']","xpath",maxto);
 		  WebElement email=driver.findElement(By.xpath("//*[@id='Email']"));
-		  email.sendKeys("ejamesb93@gmail.com");
+		  email.sendKeys(username);
 		  
 		  WebElement nextb= driver.findElement(By.id("next"));
 		  nextb.click();
 		  
 		  waitforElement("signIn","id",maxto);
 		  WebElement pass= driver.findElement(By.id("Passwd"));
-		  pass.sendKeys("Engineering-1993");
+		  pass.sendKeys(password);
 		  
 		  WebElement submitb= driver.findElement(By.id("signIn"));
 		  submitb.click();
@@ -50,7 +73,7 @@ public class Unsubscribe {
 		   for(int i=1; i<50; i++){
 			   
 		   WebElement e1= driver.findElement(By.xpath("//*[@id=':lu']/tbody/tr["+Integer.toString(i)+"]"));
-		  if(e1.getText().contains("Groupon")){
+		  if(e1.getText().contains(sender)){
 		   if (driver instanceof JavascriptExecutor) {
 		        ((JavascriptExecutor)driver).executeScript("arguments[0].style.border='3px solid red'", e1);
 		    }
@@ -61,7 +84,9 @@ public class Unsubscribe {
 		   waitforElement("//*[contains(.,'Unsubscribe')]","xpath",maxto);
 		   
 		   try{
-		   WebElement ul=driver.findElement(By.xpath("//*[contains(.,'click here')]"));
+		   WebElement ul=driver.findElement(By.xpath("//div[@class='adn ads']/*[text()[contains(.,'click here')]]"));
+		   //
+		   System.out.println(ul.getText());
 		   ul.click();
 		   //need to figure out how to cycle to gmail window
 		   }
